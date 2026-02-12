@@ -1,0 +1,77 @@
+units		real
+atom_style	full
+boundary        p p p
+
+# ------------------------------------------------------------
+# Further force field information
+pair_style      lj/cut/coul/long 11 11
+pair_modify     mix geometric tail yes
+kspace_style    pppm 1e-6
+
+bond_style      harmonic
+angle_style     harmonic
+dihedral_style  opls
+special_bonds   lj 0 0 0.5 coul 0 0 0.5
+improper_style  cvff
+
+dielectric	1
+
+# ------------------------------------------------------------
+read_data       file_name.dat
+
+neighbor        0.5 bin 
+neigh_modify    delay 0 every 1 check yes
+
+thermo_style    custom step temp pe etotal press pxx pyy pzz pxy pxz pyz xlo xhi ylo yhi zlo zhi vol
+thermo          500
+
+# ---------------------------------------------------------------------
+timestep	1
+
+variable	cpe equal pe
+variable	cvol equal vol
+variable	cent equal enthalpy
+variable	cpress equal press
+variable	cpxx equal pxx
+variable	cpyy equal pyy
+variable	cpzz equal pzz
+variable	cpxy equal pxy
+variable	cpxz equal pxz
+variable	cpyz equal pyz
+
+# Variable useful for the checking-up-lz box length
+variable	czlo equal zlo
+variable	czhi equal zhi
+
+# ----------------------------------------------------------------------------
+# Now let's start defining the setup for each compression step
+
+variable	a loop 1 50
+
+label		loop
+
+variable	pressao equal 2000*$a
+
+fix             1 all npt temp 300.0 300.0 $(100*dt) z ${pressao} ${pressao} $(1000*dt) 
+run		1000000
+unfix		1
+
+# Production !
+reset_timestep  0
+
+fix 		4 all ave/time 100 1 100 v_cvol v_cpe v_cent v_cpress v_cpxx v_cpyy v_cpzz v_cpxy v_cpxz v_cpyz file prpts_${pressao}.out mode scalar
+fix 		5 all ave/time 50 2000 100000 v_czlo v_czhi file box_${pressao}.out mode scalar
+
+write_data	equilibrated_${pressao}
+
+fix             1 all npt temp 300.0 300.0 $(100*dt) z ${pressao} ${pressao} $(1000*dt) 
+run		1000000
+unfix		1
+
+unfix		4
+unfix		5
+
+write_data	step_${pressao}
+
+next		a
+jump		lammps-oplsaa.in loop
