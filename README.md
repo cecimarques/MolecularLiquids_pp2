@@ -1,6 +1,5 @@
-Hello :)
+Welcome to further supplemental data of our paper "On the origins and predictability of the hydrostatic limit of molecular liquids" !
 
-Welcome to further supplemental data of our paper "On the origins and predictability of the hydrostatic limit of molecular liquids".
 Here goes a file description:
 
 The **files** **data1.xlsx** and **data2.xlsx** contain all the varsigma, upsilon, rho, omega_ave, D and HL data coming from our simulations which are involved in the plots shown in our manuscript as well as in its Supplemental Material. Standard errors are present when applicable. Please, use the compound-ID in table S1 of the Supplemental material of the manuscript to identify the organic liquid the data corresponds to.
